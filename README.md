@@ -1,1 +1,2 @@
-# Crop_Yeild_Prediction_2
+# Crop-Yield-Prediction-Using-Machin-Learning-Python
+Crop Yield Prediction Using Machin Learning Python
