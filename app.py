@@ -2,32 +2,39 @@ import streamlit as st
 import numpy as np
 import pickle
 import sklearn
-print(sklearn.__version__)
-#loading models
-dtr = pickle.load(open('dtr.pkl','rb'))
-preprocessor = pickle.load(open('preprocessor.pkl','rb'))
 
-#flask app
-app = Flask(__name__)
+# Print scikit-learn version for debugging
+st.write(f"Scikit-learn version: {sklearn.__version__}")
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-@app.route("/predict",methods=['POST'])
-def predict():
-    if request.method == 'POST':
-        Year = request.form['Year']
-        average_rain_fall_mm_per_year = request.form['average_rain_fall_mm_per_year']
-        pesticides_tonnes = request.form['pesticides_tonnes']
-        avg_temp = request.form['avg_temp']
-        Area = request.form['Area']
-        Item  = request.form['Item']
+# Load models
+with open("dtr.pkl", "rb") as model_file:
+    dtr = pickle.load(model_file)
 
-        features = np.array([[Year,average_rain_fall_mm_per_year,pesticides_tonnes,avg_temp,Area,Item]],dtype=object)
+with open("preprocessor.pkl", "rb") as preprocessor_file:
+    preprocessor = pickle.load(preprocessor_file)
+
+# Streamlit App
+st.title("Crop Yield Prediction")
+
+# User input fields
+Year = st.number_input("Year", min_value=1900, max_value=2100, step=1)
+average_rain_fall_mm_per_year = st.number_input("Average Rainfall (mm/year)")
+pesticides_tonnes = st.number_input("Pesticides Used (tonnes)")
+avg_temp = st.number_input("Average Temperature (°C)")
+Area = st.text_input("Area Name")
+Item = st.text_input("Crop Name")
+
+# Prediction button
+if st.button("Predict Crop Yield"):
+    try:
+        # Prepare input data
+        features = np.array([[Year, average_rain_fall_mm_per_year, pesticides_tonnes, avg_temp, Area, Item]], dtype=object)
         transformed_features = preprocessor.transform(features)
-        prediction = dtr.predict(transformed_features).reshape(1,-1)
 
-        return render_template('index.html',prediction = prediction)
+        # Make prediction
+        prediction = dtr.predict(transformed_features)[0]
 
-if __name__=="__main__":
-    app.run(debug=True, use_reloader=False)
+        # Display result
+        st.success(f"Predicted Crop Yield: {prediction:.2f} tons")
+    except Exception as e:
+        st.error(f"Error in prediction: {e}")
