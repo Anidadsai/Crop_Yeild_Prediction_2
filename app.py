@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pickle
-import sklearn
+import sklearn == 1.6.1
 
 # Print scikit-learn version for debugging
 st.write(f"Scikit-learn version: {sklearn.__version__}")
